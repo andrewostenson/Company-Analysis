@@ -21,6 +21,31 @@ def get_filing_history(cik):
         return response.json()
     else:
         return None
+    
+def get_lastest_10K(filing_history):
+    recent = filing_history['filings']['recent']
+    forms = recent['form']
+    accession_numbers = recent['accessionNumber']
+    filing_dates = recent['filingDate']
+    primary_documents = recent['primaryDocument']
+
+    for index, form in enumerate(forms):
+        if form == '10-K':
+            return {
+                'accession_number': accession_numbers[index],
+                'filing_date': filing_dates[index],
+                'primary_document': primary_documents[index]
+            }
+    return None
+
+def get_10K_document(cik, accession_number, primary_document):
+    accession_number_no_dashes = accession_number.replace("-", "")
+    url = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession_number_no_dashes}/{primary_document}"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None 
 
 if __name__ == '__main__':
     ticker = input("Enter a stock ticker: ")
@@ -28,10 +53,13 @@ if __name__ == '__main__':
     if cik:
         print(f"CIK for {ticker}: {cik}")
         filing_history = get_filing_history(cik)
-        if filing_history:
-            with open("data/test_data.json", "w", encoding="utf-8") as file:
-                json.dump(filing_history, file, indent=4)
+        recent_10K = get_lastest_10K(filing_history)
+        if recent_10K:
+            document = get_10K_document(cik, recent_10K['accession_number'], recent_10K['primary_document'])
+            if document:
+                with open("data/10K_document.json", "w", encoding="utf-8") as file:
+                    json.dump(document, file, indent=4)
         else:
-            print(f"Could not retrieve filing history for CIK {cik}.")
+            print(f"Could not retrieve latest 10-K for CIK {cik}.")
     else:
         print(f"No CIK found for ticker {ticker}.")
