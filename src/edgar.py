@@ -1,5 +1,7 @@
 import json
 import requests
+from bs4 import BeautifulSoup
+import re
 
 headers = {'User-Agent': "Andrew Ostenson ostensonandrew@gmail.com"}
 
@@ -45,7 +47,25 @@ def get_10K_document(cik, accession_number, primary_document):
         return response.text
     else:
         return None 
+    
+def clean_html(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser') 
+    pattern = r"(Item\s+\d+[A-Z]?\.)" # Regex pattern to match "Item" followed by a number and an optional letter, ending with a period
+    full_text = soup.get_text(strip=True, separator='\n') # Extract all text from the HTML content, stripping leading and trailing whitespace
+    parts = re.split(pattern, full_text) # Split the text into parts based on the regex pattern
+    sections = []
 
+    for i in range(1, len(parts), 2): # Iterate through the parts, starting from index 1 and stepping by 2 to get the "Item" sections
+        item_label = parts[i] # The "Item" label (e.g., "Item 1.")
+        item_content = parts[i + 1] if i + 1 < len(parts) else "" # The content corresponding to the "Item" label, or an empty string if there is no content
+        sections.append({
+            "item": item_label,
+            "content": item_content.strip()
+        })
+
+    print("Number of sections extracted:", len(sections)) # Print the number of sections extracted
+    return sections
+    
 if __name__ == '__main__':
     ticker = input("Enter a stock ticker: ")
     cik = get_cik(ticker)
@@ -57,10 +77,12 @@ if __name__ == '__main__':
 
         if recent_10K:
             document = get_10K_document(cik, recent_10K['accession_number'], recent_10K['primary_document'])
-            
             if document:
-                with open("data/10K_document.html", "w", encoding="utf-8") as file:
-                    file.write(document)
+                cleaned_sections = clean_html(document)
+                with open(f"data/10K_document.txt", "w", encoding="utf-8") as f:
+                    for section in cleaned_sections:
+                        f.write(f"{section['item']}\n{section['content']}\n\n")
+                print(f"Successfully retrieved and cleaned the 10-K document for CIK {cik}.")
             else:
                 print(f"Could not retrieve the 10-K document for CIK {cik}.")
         else:
