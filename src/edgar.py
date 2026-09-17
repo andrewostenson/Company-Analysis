@@ -63,8 +63,17 @@ def clean_html(html_content):
             "content": item_content.strip()
         })
 
-    print("Number of sections extracted:", len(sections)) # Print the number of sections extracted
-    return sections
+    best_by_item = {}
+    for section in sections:
+        label = section["item"]
+        if label not in best_by_item:
+            best_by_item[label] = section
+        elif len(section["content"]) > len(best_by_item[label]["content"]):
+            best_by_item[label] = section
+
+    filtered_sections = list(best_by_item.values())
+    print("Number of sections extracted:", len(filtered_sections)) # Print the number of sections extracted
+    return filtered_sections
     
 if __name__ == '__main__':
     ticker = input("Enter a stock ticker: ")
