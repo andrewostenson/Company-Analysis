@@ -32,21 +32,20 @@ def chunk_10K(markdown_document):
     headers_to_split_on = [ 
         ("#", "Header 1"),
         ("##", "Header 2"),
-        ("###", "Header 3"),
     ]
 
-    # Split on headers
+    # Chunk by markdown headers
     markdown_splitter = MarkdownHeaderTextSplitter(
     headers_to_split_on=headers_to_split_on, strip_headers=False
 )
     md_header_splits = markdown_splitter.split_text(markdown_document)
 
-    # Create chunks 
+    # Chunk individual text sections
     text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
-        tokenizer, chunk_size=100, chunk_overlap=10
+        tokenizer, chunk_size=200, chunk_overlap=10
     )
 
-    # Finalize chunks with respect to markdown headers and tokens
+    # 
     splits = text_splitter.split_documents(md_header_splits)
     return splits
 
