@@ -6,9 +6,6 @@ def embedChunks(chunks):
     embeddings = model.encode(chunks)
     return embeddings
 
-def embed10K():
-    document = sec.get_lastest_10K()
-    chunks = sec.chunk_10K(document)
-    text = [doc.page_content for doc in chunks]
-    embeddings = embedChunks(text)
+def embedPageContent(pageContent):
+    embeddings = embedChunks(pageContent)
     return embeddings

@@ -11,21 +11,12 @@ def get_lastest_10K():
             company_request = input("Enter a stock ticker: ")
             filing = (Company(company_request)).get_filings(form="10-K")[0]
             filing_txt = filing.markdown() #C onvert 10K into markdown for chunking
-
-            try:
-                with open('data/10K-doc.txt', 'w') as file:
-                    file.write(filing_txt)
-
-                print(f"Saved latest 10-K for {company_request} to data/10K-doc.txt")
-                return filing_txt
-
-
-            except OSError as e:
-                print(f"10K file could not be written: {e}")
+            return filing_txt
 
         except NotFoundError as e:
             print(f"No such company: {e}")
             continue
+
 
 def chunk_10K(markdown_document):
     tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2") # Chunk based on token size of model
@@ -48,3 +39,20 @@ def chunk_10K(markdown_document):
     # 
     splits = text_splitter.split_documents(md_header_splits)
     return splits
+
+def getChunks():
+    document = get_lastest_10K()
+    chunks = chunk_10K(document)
+    return chunks
+
+def getPageContent(chunks):
+    text = [doc.page_content for doc in chunks]
+    return text
+
+def getMetadata(chunks):
+    metadata = [doc.metadata for doc in chunks]
+
+    for i in range(len(metadata)):
+        if not metadata[i]:
+            metadata[i] = {"Header 1": "N/A"}
+    return metadata
