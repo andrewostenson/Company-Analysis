@@ -48,11 +48,3 @@ def chunk_10K(markdown_document):
     # 
     splits = text_splitter.split_documents(md_header_splits)
     return splits
-
-    
-if __name__ == '__main__':
-    document = get_lastest_10K()
-    chunks = str(chunk_10K(document))
-
-    with open('data/chunked10K.txt', 'w') as file:
-        file.write(chunks)
