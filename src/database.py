@@ -2,7 +2,7 @@ import chromadb
 import embedding as em
 import sec_ret as sec
 
-chroma_client = chromadb.Client()
+chroma_client = chromadb.PersistentClient(path="/home/ubuntu/Company-Analysis/chroma_data")
 collection = chroma_client.create_collection(name="secAnalysis")
 
 def buildCollection():
