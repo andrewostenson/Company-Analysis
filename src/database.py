@@ -4,14 +4,14 @@ import sec_ret as sec
 
 chroma_client = chromadb.PersistentClient(path="/home/ubuntu/Company-Analysis/chroma_data")
 collection = chroma_client.get_or_create_collection(name="secAnalysis")
+model = em.intModel()
 
 def buildCollection():
-    model = em.intModel()
     chunks = sec.getChunks()
 
     metadata = sec.getMetadata(chunks)
-    documents = sec.getPageContent(chunks, model)
-    embeddings = em.embedPageContent(documents)
+    documents = sec.getPageContent(chunks)
+    embeddings = em.embedPageContent(documents, model)
     doc_ids = [str(x) for x in range(len(documents))]
 
     collection.add(ids = doc_ids, embeddings = embeddings, metadatas = metadata, documents = documents)
@@ -26,4 +26,5 @@ def queryCollection(embeddings):
 if __name__ == "__main__":
     q = input("Enter query")
     buildCollection()
-    queryCollection(q)
+    embeddedq = em.embedUserInput(q, model)
+    queryCollection(embeddedq)
