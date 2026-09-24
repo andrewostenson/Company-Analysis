@@ -14,5 +14,5 @@ def embedPageContent(pageContent, model):
     return embeddings
 
 def embedUserInput(uInput, model):
-    embeddings = model.encode(uInput)
-    return embeddings
+    embedding = model.encode(uInput)
+    return embedding
