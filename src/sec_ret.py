@@ -6,11 +6,10 @@ from sentence_transformers import SentenceTransformer
 
 set_identity("ostensonandrew@gmail.com")
 
-def get_lastest_10K():
+def get_lastest_10K(ticker):
     while True:
         try:
-            company_request = input("Enter a stock ticker: ")
-            filing = (Company(company_request)).get_filings(form="10-K")[0]
+            filing = (Company(ticker)).get_filings(form="10-K")[0]
             filing_txt = filing.markdown() #C onvert 10K into markdown for chunking
             return filing_txt
 
@@ -41,8 +40,8 @@ def chunk_10K(markdown_document):
     splits = text_splitter.split_documents(md_header_splits)
     return splits
 
-def getChunks():
-    document = get_lastest_10K()
+def getChunks(ticker):
+    document = get_lastest_10K(ticker)
     chunks = chunk_10K(document)
     return chunks
 

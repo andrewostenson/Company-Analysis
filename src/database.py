@@ -2,13 +2,13 @@ import chromadb
 import sec_ret as sec
 from openai import OpenAI
 
-chroma_client = chromadb.PersistentClient(path="/home/ubuntu/Company-Analysis/chroma_data")
+chroma_client = chromadb.PersistentClient(path="/app/chroma_data")
 collection = chroma_client.get_or_create_collection(name="secAnalysis")
 model = sec.initModel()
 client = OpenAI()
 
-def buildCollection():
-    chunks = sec.getChunks()
+def buildCollection(ticker):
+    chunks = sec.getChunks(ticker)
 
     metadata = sec.getMetadata(chunks)
     documents = sec.getPageContent(chunks)
@@ -22,6 +22,10 @@ def queryCollection(embeddings):
         query_embeddings = embeddings
     )
     return results
+
+def embedQuestion(question):
+    embedding = sec.embedUserInput(question, model)
+    return embedding
 
 def gptQuery(query, chunks):
     documents = chunks["documents"][0]
@@ -41,11 +45,4 @@ def gptQuery(query, chunks):
     model="gpt-5-mini",
     input=gpt_input
     )
-    print(response.output_text)
-
-if __name__ == "__main__":
-    q = input("Enter query")
-    buildCollection()
-    embeddedq = sec.embedUserInput(q, model)
-    collection = queryCollection(embeddedq)
-    gptQuery(q, collection)
+    return response.output_text
