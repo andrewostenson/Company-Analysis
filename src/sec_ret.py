@@ -2,6 +2,7 @@ from edgar import *
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_text_splitters import MarkdownHeaderTextSplitter
 from transformers import AutoTokenizer
+from sentence_transformers import SentenceTransformer
 
 set_identity("ostensonandrew@gmail.com")
 
@@ -56,3 +57,19 @@ def getMetadata(chunks):
         if not metadata[i]:
             metadata[i] = {"Header 1": "N/A"}
     return metadata
+
+def initModel():
+    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    return model;
+
+def embedChunks(chunks, model):
+    embeddings = model.encode(chunks)
+    return embeddings
+
+def embedPageContent(pageContent, model):
+    embeddings = embedChunks(pageContent, model)
+    return embeddings
+
+def embedUserInput(uInput, model):
+    embedding = model.encode(uInput)
+    return embedding
